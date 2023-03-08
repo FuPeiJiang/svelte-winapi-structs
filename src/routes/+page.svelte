@@ -1,8 +1,5 @@
 <svelte:head>
     <title>svelte-winapi-structs</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@500&display=swap" rel="stylesheet">
 </svelte:head>
 
 <script>
@@ -11,6 +8,7 @@ import flattened from './flattened2.json'
 let currentStruct = ""
 let currentArr = []
 let expandedArr = []
+let tableArr = []
 
 const everythingObj = {}
 for (const [key, value] of flattened) {
@@ -30,35 +28,66 @@ function maybeBits(arr_of_type_name_offset) {
 }
 
 function handleClick(weirdArr) {
-    currentStruct = weirdArr[0]
-    const arr_of_type_name_offset = weirdArr[1]
-    const tempArr = []
-    function handleArr(arr_of_type_name_offset, savedOffset, carryString) {
-        for (const type_name_offset_ of arr_of_type_name_offset) {
-            const type = type_name_offset_[0]
-            const name = type_name_offset_[1]
-            const offset = type_name_offset_[2]
-            if (everythingObj.hasOwnProperty(type)) {
-                handleArr(everythingObj[type], savedOffset + offset, `${carryString}${name}.`)
-            } else {
-                const copy_type_name_offset = type_name_offset_.slice()
-                if (copy_type_name_offset.length === 4) {
-                    copy_type_name_offset[2] += 8*savedOffset
-                } else {
-                    copy_type_name_offset[2] += savedOffset
-                }
-                copy_type_name_offset[1]=`${carryString}${copy_type_name_offset[1]}`
-                tempArr.push(copy_type_name_offset)
-            }
+    const tempTableArr = []
+    let maxDepth = -Infinity
+    function handle(typeNameSize, saveIdx, depth, savedOffset, carryString) {
+        if (saveIdx === tempTableArr.length) {
+            tempTableArr.push([])
         }
+        let sumLength = 0
+        if (everythingObj.hasOwnProperty(typeNameSize[0])) {
+            const arrEditLater = [typeNameSize[0]]
+            tempTableArr[saveIdx].push(arrEditLater)
+            for (const typeNameSize2 of everythingObj[typeNameSize[0]]) {
+                sumLength+=handle(typeNameSize2, saveIdx + sumLength, depth + 1, typeNameSize2[2] + savedOffset, `${carryString}${typeNameSize[1]}.`)
+            }
+            arrEditLater.push(sumLength)
+        } else {
+
+            let offset_str
+            if (typeNameSize.length === 4) {
+                offset_str = `${Math.trunc(savedOffset/8)}bytes,${savedOffset%8}bits`
+            } else {
+                offset_str = `${savedOffset}`
+            }
+
+            if (depth > maxDepth) {
+                maxDepth = depth
+            }
+            tempTableArr[saveIdx].push(typeNameSize[0], [`${carryString}${typeNameSize[1]}`, offset_str], depth)
+            sumLength = 1
+        }
+        return sumLength
     }
-    handleArr(arr_of_type_name_offset, 0, "")
-    currentArr = maybeBits(arr_of_type_name_offset)
-    expandedArr = maybeBits(tempArr)
+    handle([weirdArr[0], ""], 0, 0, 0, "")
+    for (const arr_ of tempTableArr) {
+        const depth = arr_.pop()
+        const diff = maxDepth - depth
+        arr_.splice(arr_.length - 1, 0, ...((new Array(diff)).fill("")))
+    }
+    tableArr = tempTableArr
     document.body.scrollTop = document.documentElement.scrollTop = 0;
 }
 
 </script>
+
+<table>
+    <tbody>
+        {#each tableArr as rowArr}
+        <tr>
+        {#each {length:rowArr.length - 2} as _, i}
+        {#if typeof rowArr[i] === "object"}
+            <td rowspan={rowArr[i][1]} colspan={rowArr[i].length > 2 && rowArr[i][2]}>{rowArr[i][0]}</td>
+        {:else}
+            <td class="diagonal"></td>
+        {/if}
+        {/each}
+        <td><div class="space-between"><p class="margin-right">{rowArr[rowArr.length-1][0]}</p><p>{rowArr[rowArr.length-1][1]}</p></div></td>
+        </tr>
+        {/each}
+
+    </tbody>
+</table>
 
 <h4>{currentStruct}</h4>
 <div style="display: flex; flex-direction: row;">
@@ -82,6 +111,36 @@ function handleClick(weirdArr) {
 
 <style>
     * {
-        font-family: 'Fira Code', monospace;
+        font-family: 'Fira Code', Consolas, monaco, monospace;
+    }
+    table {
+        border-collapse: collapse;
+    }
+    td {
+        border: 1em solid black
+    }
+    .diagonal {
+        background-image: linear-gradient(
+  -45deg,
+  #434343 12.5%,
+  #202020 12.5%, #202020 50%,
+  #434343 50%, #434343 62.5%,
+  #202020 62.5%, #202020 100%
+);
+    background-size: 8px 8px;
+    /* #202020 */
+    /* #434343 */
+    /* #5645645 */
+    }
+
+    .space-between {
+        display: flex; justify-content: space-between;
+    }
+    .margin-right {
+        margin-right: 1em;
+    }
+    p {
+        margin-top: 0px;
+        margin-bottom: 0px;
     }
 </style>
