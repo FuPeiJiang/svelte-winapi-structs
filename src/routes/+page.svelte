@@ -33,12 +33,13 @@ function handleClick(weirdArr) {
     currentStruct = weirdArr[0]
     const arr_of_type_name_offset = weirdArr[1]
     const tempArr = []
-    function handleArr(arr_of_type_name_offset, savedOffset) {
+    function handleArr(arr_of_type_name_offset, savedOffset, carryString) {
         for (const type_name_offset_ of arr_of_type_name_offset) {
             const type = type_name_offset_[0]
+            const name = type_name_offset_[1]
             const offset = type_name_offset_[2]
             if (everythingObj.hasOwnProperty(type)) {
-                handleArr(everythingObj[type], savedOffset + offset)
+                handleArr(everythingObj[type], savedOffset + offset, `${carryString}${name}.`)
             } else {
                 const copy_type_name_offset = type_name_offset_.slice()
                 if (copy_type_name_offset.length === 4) {
@@ -46,11 +47,12 @@ function handleClick(weirdArr) {
                 } else {
                     copy_type_name_offset[2] += savedOffset
                 }
+                copy_type_name_offset[1]=`${carryString}${copy_type_name_offset[1]}`
                 tempArr.push(copy_type_name_offset)
             }
         }
     }
-    handleArr(arr_of_type_name_offset, 0)
+    handleArr(arr_of_type_name_offset, 0, "")
     currentArr = maybeBits(arr_of_type_name_offset)
     expandedArr = maybeBits(tempArr)
     document.body.scrollTop = document.documentElement.scrollTop = 0;
