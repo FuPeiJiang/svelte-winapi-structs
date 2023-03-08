@@ -7,23 +7,70 @@
 
 <script>
 
-import flattened from './flattened1.json'
+import flattened from './flattened2.json'
+let currentStruct = ""
 let currentArr = []
+let expandedArr = []
 
-function handleClick(arr_of_type_name_offset) {
-    currentArr = arr_of_type_name_offset
+const everythingObj = {}
+for (const [key, value] of flattened) {
+    everythingObj[key] = value
+}
+
+function maybeBits(arr_of_type_name_offset) {
+    const copy_arr_of_type_name_offset = []
+    for (const type_name_offset_ of arr_of_type_name_offset) {
+        const copy_type_name_offset = type_name_offset_.slice()
+        if (copy_type_name_offset.length === 4) {
+            copy_type_name_offset[2] = `${Math.trunc(copy_type_name_offset[2]/8)}bytes,${copy_type_name_offset[2]%8}bits`
+        }
+        copy_arr_of_type_name_offset.push(copy_type_name_offset)
+    }
+    return copy_arr_of_type_name_offset
+}
+
+function handleClick(weirdArr) {
+    currentStruct = weirdArr[0]
+    const arr_of_type_name_offset = weirdArr[1]
+    const tempArr = []
+    function handleArr(arr_of_type_name_offset) {
+        for (const type_name_offset_ of arr_of_type_name_offset) {
+            const type = type_name_offset_[0]
+            console.log(type)
+            if (everythingObj.hasOwnProperty(type)) {
+                handleArr(everythingObj[type])
+            } else {
+                tempArr.push(type_name_offset_)
+            }
+        }
+    }
+    handleArr(arr_of_type_name_offset)
+    currentArr = maybeBits(arr_of_type_name_offset)
+    expandedArr = maybeBits(tempArr)
     document.body.scrollTop = document.documentElement.scrollTop = 0;
 }
 
 </script>
 
-{#each currentArr as element}
-<p>{element[0]} {element[1]} {element[2]}</p>
-{/each}
+<h4>{currentStruct}</h4>
+<div style="display: flex; flex-direction: row;">
+    <div>
+        {#each currentArr as element}
+        <p>{element[0]} {element[1]} {element[2]}</p>
+        {/each}
+    </div>
+    <div>
+        {#each expandedArr as element}
+        <p>{element[0]} {element[1]} {element[2]}</p>
+        {/each}
+    </div>
+</div>
 
-{#each flattened as weirdArr}
-<button on:click={()=>handleClick(weirdArr[1])}>{weirdArr[0]}</button>
-{/each}
+<div>
+    {#each flattened as weirdArr}
+    <button on:click={()=>handleClick(weirdArr)}>{weirdArr[0]}</button>
+    {/each}
+</div>
 
 <style>
     * {
