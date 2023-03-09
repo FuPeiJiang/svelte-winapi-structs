@@ -4,7 +4,7 @@
 
 <script>
 
-import flattened from './flattened2.json'
+import flattened from './flattened3.json'
 let currentStruct = ""
 let currentArr = []
 let expandedArr = []
