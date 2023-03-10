@@ -5,15 +5,13 @@
 <script>
 
 import flattened from './flattened3.json'
-let current_sizeof = ""
-let currentArr = []
-let expandedArr = []
-let tableArr = []
 
 const everythingObj = {}
 for (const [key, value] of flattened) {
     everythingObj[key] = value
 }
+
+const you_would_never_guess = flattened.map(idk=>handleClick(idk))
 
 function maybeBits(arr_of_type_name_offset) {
     const copy_arr_of_type_name_offset = []
@@ -65,53 +63,40 @@ function handleClick(weirdArr) {
         const diff = maxDepth - depth
         arr_.splice(arr_.length - 1, 0, ...((new Array(diff)).fill("")))
     }
-    tableArr = tempTableArr
-    current_sizeof = weirdArr[1][0]
-    document.body.scrollTop = document.documentElement.scrollTop = 0;
+    return {tableArr:tempTableArr, current_sizeof:weirdArr[1][0]}
 }
 
 </script>
 
-<table>
-    <tbody>
-        {#each tableArr as rowArr}
-        <tr>
-        {#each {length:rowArr.length - 1} as _, i}
-        {#if typeof rowArr[i] === "object"}
-            <td rowspan={rowArr[i][1]} colspan={rowArr[i].length > 2 && rowArr[i][2]}>{rowArr[i][0]}</td>
-        {:else}
-            {#if rowArr[i]}
-            <td>{rowArr[i]}</td>
-            {:else}
-            <td class="diagonal"></td>
-            {/if}
-        {/if}
-        {/each}
-        <td>{rowArr[rowArr.length-1][0]}</td>
-        <td class="number">{rowArr[rowArr.length-1][1]}</td>
-        </tr>
-        {/each}
 
-    </tbody>
-</table>
-
-<div style="display: flex; flex-direction: row;">
-    <div>
-        {#each currentArr as element}
-        <p>{element[0]} {element[1]} {element[2]}</p>
-        {/each}
-    </div>
-    <div>
-        {#each expandedArr as element}
-        <p>{element[0]} {element[1]} {element[2]}</p>
-        {/each}
-    </div>
-</div>
-<h4>{current_sizeof}</h4>
 
 <div>
-    {#each flattened as weirdArr}
-    <button on:click={()=>handleClick(weirdArr)}>{weirdArr[0]}</button>
+    {#each you_would_never_guess as {tableArr, current_sizeof}}
+    <table>
+        <tbody>
+            {#each tableArr as rowArr}
+            <tr>
+            {#each {length:rowArr.length - 1} as _, i}
+            {#if typeof rowArr[i] === "object"}
+                <td rowspan={rowArr[i][1]} colspan={rowArr[i].length > 2 && rowArr[i][2]}>{rowArr[i][0]}</td>
+            {:else}
+                {#if rowArr[i]}
+                <td>{rowArr[i]}</td>
+                {:else}
+                <td class="diagonal"></td>
+                {/if}
+            {/if}
+            {/each}
+            <td>{rowArr[rowArr.length-1][0]}</td>
+            <td class="number">{rowArr[rowArr.length-1][1]}</td>
+            </tr>
+            {/each}
+
+        </tbody>
+    </table>
+
+    <p>│
+└─{current_sizeof}</p>
     {/each}
 </div>
 
@@ -138,20 +123,14 @@ function handleClick(weirdArr) {
     /* #434343 */
     /* #5645645 */
     }
-
-    .space-between {
-        display: flex; justify-content: space-between;
-    }
-    .margin-right {
-        margin-right: 1em;
-    }
-    p {
-        margin-top: 0px;
-        margin-bottom: 0px;
-    }
     .number {
         padding-left: 0.5em;
         font-weight: bold;
         border: none;
+    }
+    p {
+        white-space: pre;
+        font-weight: bold;
+        margin-top: 0px;
     }
 </style>
