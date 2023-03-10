@@ -76,11 +76,15 @@ function handleClick(weirdArr) {
     <tbody>
         {#each tableArr as rowArr}
         <tr>
-        {#each {length:rowArr.length - 2} as _, i}
+        {#each {length:rowArr.length - 1} as _, i}
         {#if typeof rowArr[i] === "object"}
             <td rowspan={rowArr[i][1]} colspan={rowArr[i].length > 2 && rowArr[i][2]}>{rowArr[i][0]}</td>
         {:else}
+            {#if rowArr[i]}
+            <td>{rowArr[i]}</td>
+            {:else}
             <td class="diagonal"></td>
+            {/if}
         {/if}
         {/each}
         <td><div class="space-between"><p class="margin-right">{rowArr[rowArr.length-1][0]}</p><p>{rowArr[rowArr.length-1][1]}</p></div></td>
