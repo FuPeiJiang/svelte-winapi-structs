@@ -87,7 +87,8 @@ function handleClick(weirdArr) {
             {/if}
         {/if}
         {/each}
-        <td><div class="space-between"><p class="margin-right">{rowArr[rowArr.length-1][0]}</p><p>{rowArr[rowArr.length-1][1]}</p></div></td>
+        <td>{rowArr[rowArr.length-1][0]}</td>
+        <td class="number">{rowArr[rowArr.length-1][1]}</td>
         </tr>
         {/each}
 
@@ -147,5 +148,10 @@ function handleClick(weirdArr) {
     p {
         margin-top: 0px;
         margin-bottom: 0px;
+    }
+    .number {
+        padding-left: 0.5em;
+        font-weight: bold;
+        border: none;
     }
 </style>
