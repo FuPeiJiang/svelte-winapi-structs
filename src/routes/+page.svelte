@@ -5,7 +5,7 @@
 <script>
 
 import flattened from './flattened3.json'
-let currentStruct = ""
+let current_sizeof = ""
 let currentArr = []
 let expandedArr = []
 let tableArr = []
@@ -38,7 +38,7 @@ function handleClick(weirdArr) {
         if (everythingObj.hasOwnProperty(typeNameSize[0])) {
             const arrEditLater = [typeNameSize[0]]
             tempTableArr[saveIdx].push(arrEditLater)
-            for (const typeNameSize2 of everythingObj[typeNameSize[0]]) {
+            for (const typeNameSize2 of everythingObj[typeNameSize[0]][1]) {
                 sumLength+=handle(typeNameSize2, saveIdx + sumLength, depth + 1, typeNameSize2[2] + savedOffset, `${carryString}${typeNameSize[1]}.`)
             }
             arrEditLater.push(sumLength)
@@ -66,6 +66,7 @@ function handleClick(weirdArr) {
         arr_.splice(arr_.length - 1, 0, ...((new Array(diff)).fill("")))
     }
     tableArr = tempTableArr
+    current_sizeof = weirdArr[1][0]
     document.body.scrollTop = document.documentElement.scrollTop = 0;
 }
 
@@ -89,7 +90,6 @@ function handleClick(weirdArr) {
     </tbody>
 </table>
 
-<h4>{currentStruct}</h4>
 <div style="display: flex; flex-direction: row;">
     <div>
         {#each currentArr as element}
@@ -102,6 +102,7 @@ function handleClick(weirdArr) {
         {/each}
     </div>
 </div>
+<h4>{current_sizeof}</h4>
 
 <div>
     {#each flattened as weirdArr}
